@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CourseItem, CourseItemProps } from '@/components/CourseItem';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { COURSES_DATA } from '@/constants/CoursesData';
 
 export default function CoursesScreen() {
@@ -48,9 +49,7 @@ export default function CoursesScreen() {
       </ThemedView>
 
       {loading ? (
-        <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Cargando cursos...</ThemedText>
-        </ThemedView>
+        <LoadingScreen message="Cargando cursos..."/>
       ) : (
         <FlatList
           data={courses}

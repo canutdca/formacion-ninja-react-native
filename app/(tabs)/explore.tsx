@@ -1,21 +1,25 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { FilterPanel } from '@/components/search/FilterPanel';
+import { FilterPanel } from '@/components/search/filters/FilterPanel';
 import { SearchBar } from '@/components/search/SearchBar';
 import { SearchResults } from '@/components/search/SearchResults';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+import { Colors } from '@/constants/Colors';
 import { COURSES_DATA } from '@/constants/CoursesData';
+import { useColorScheme } from '@/hooks/useColorScheme.web';
 import { useSearchEngine } from '@/hooks/useSearchEngine';
+import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ExploreScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  
+  const colorScheme = useColorScheme() ?? 'light';
+
   const {
-    query, 
+    query,
     setQuery,
     filters,
     setFilters,
@@ -29,21 +33,24 @@ export default function ExploreScreen() {
     searchSuggestions
   } = useSearchEngine(COURSES_DATA);
 
+  const hasActiveFilters = () => {
+    return (
+      filters.categories.length > 0 ||
+      filters.durations.length > 0 ||
+      filters.levels.length > 0
+    );
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
   if (isLoading) {
-    return (
-      <SafeAreaView style={styles.loadingContainer} edges={['top']}>
-        <ActivityIndicator size="large" />
-        <ThemedText style={styles.loadingText}>Inicializando motor de búsqueda...</ThemedText>
-      </SafeAreaView>
-    );
+    return <LoadingScreen message="Inicializando motor de búsqueda..."/>;
   }
 
   return (
@@ -55,39 +62,50 @@ export default function ExploreScreen() {
         </ThemedText>
       </ThemedView>
 
-      <SearchBar 
-        query={query} 
-        onChangeQuery={setQuery} 
-        onSearch={performSearch}
-        suggestions={searchSuggestions}
-      />
-      
-      <ThemedView style={styles.filtersToggleContainer}>
-        <ThemedText 
-          style={styles.filtersToggle}
-          onPress={() => setShowFilters(!showFilters)}
-        >
-          {showFilters ? "Ocultar filtros" : "Mostrar filtros"}
-        </ThemedText>
+      <ThemedView style={styles.searchSection}>
+        <ThemedView style={styles.searcherContainer}>
+          <ThemedView style={styles.searchBarContainer}>
+            <SearchBar
+              query={query}
+              onChangeQuery={setQuery}
+              onSearch={performSearch}
+              suggestions={searchSuggestions}
+            />
+          </ThemedView>
+          <ThemedText
+            style={styles.filtersToggle}
+            onPress={() => setShowFilters(!showFilters)}
+          >
+            <IconSymbol
+              name={hasActiveFilters()
+                ? "line.horizontal.3.decrease.circle.fill"
+                : "line.horizontal.3.decrease.circle"}
+              size={20}
+              color={Colors[colorScheme].icon}
+            />
+          </ThemedText>
+        </ThemedView>
       </ThemedView>
-      
-      {showFilters && (
-        <FilterPanel
-          categories={getCategories()}
-          durations={getDurations()}
-          levels={getLevels()}
-          selectedFilters={filters}
-          onFilterChange={setFilters}
-          onClearFilters={clearFilters}
-        />
-      )}
 
-      <SearchResults 
-        results={searchResults}
-        isSearching={isSearching}
-        searchQuery={query}
-        filters={filters}
+      <FilterPanel
+        categories={getCategories()}
+        durations={getDurations()}
+        levels={getLevels()}
+        selectedFilters={filters}
+        onFilterChange={setFilters}
+        onClearFilters={clearFilters}
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
       />
+
+      <ThemedView style={styles.resultsContainer}>
+        <SearchResults
+          results={searchResults}
+          isSearching={isSearching}
+          searchQuery={query}
+          filters={filters}
+        />
+      </ThemedView>
     </SafeAreaView>
   );
 }
@@ -101,9 +119,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    marginTop: 16,
-  },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -112,12 +127,28 @@ const styles = StyleSheet.create({
     marginTop: 8,
     opacity: 0.7,
   },
-  filtersToggleContainer: {
+  searchSection: {
+    position: 'relative',
+    zIndex: 20,
+  },
+  searcherContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  searchBarContainer: {
+    flex: 1,
   },
   filtersToggle: {
     color: '#0a7ea4',
     fontWeight: '600',
+    marginLeft: 'auto',
+  },
+  resultsContainer: {
+    flex: 1,
+    position: 'relative',
+    zIndex: 1,
   },
 });

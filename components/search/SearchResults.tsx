@@ -1,9 +1,8 @@
 import { CourseItem, CourseItemProps } from '@/components/CourseItem';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import React from 'react';
 import { ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { Filters } from './FilterPanel';
+import { Filters } from './filters/FilterPanel';
 
 type SearchResultsProps = {
   results: CourseItemProps[];
@@ -14,11 +13,11 @@ type SearchResultsProps = {
 
 const EmptyList = ({ searchQuery, filters }: { searchQuery: string, filters: Filters }) => {
   const hasActiveSearch = searchQuery.length > 0;
-  const hasActiveFilters = 
-    filters.categories.length > 0 || 
-    filters.durations.length > 0 || 
+  const hasActiveFilters =
+    filters.categories.length > 0 ||
+    filters.durations.length > 0 ||
     filters.levels.length > 0;
-  
+
   if (hasActiveSearch || hasActiveFilters) {
     return (
       <ThemedView style={styles.emptyContainer}>
@@ -29,7 +28,7 @@ const EmptyList = ({ searchQuery, filters }: { searchQuery: string, filters: Fil
       </ThemedView>
     );
   }
-  
+
   return (
     <ThemedView style={styles.emptyContainer}>
       <ThemedText style={styles.emptyTitle}>Explora los cursos disponibles</ThemedText>
@@ -70,14 +69,14 @@ export function SearchResults({
       </ThemedText>
     ) : null;
   };
-  
+
   const LoadingView = () => (
     <ThemedView style={styles.loadingContainer}>
       <ActivityIndicator size="large" />
       <ThemedText style={styles.loadingText}>Buscando cursos...</ThemedText>
     </ThemedView>
   );
-  
+
   return (
     <ThemedView style={styles.container}>
       {isSearching ? (
@@ -135,4 +134,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.7,
   },
-}); 
+});

@@ -105,3 +105,12 @@ npm start
 ```
 
 ¡Buena suerte!
+
+
+# Tareas realizadas:
+1. Preparar vscode para poder trabajar correctamente con eslint.
+2. Organizar mejor la caja de búsqueda y los filtros:
+   - Añadir los iconos que no se están viendo
+   - Que estén alineados horitonzalmente.
+   - Que el FilterPanel sea un modal y se vean fácilmente todas las opciones y las marcadas.
+   - Separación de funcionalidades por componentes: SearchSuggestions, LoadingScreen, FilterChips, FilterSection
