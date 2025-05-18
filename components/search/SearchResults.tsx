@@ -1,5 +1,6 @@
 import { CourseItem, CourseItemProps } from '@/components/CourseItem';
 import { ThemedView } from '@/components/ThemedView';
+import { useCallback } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { LoadingScreen } from '../ui/LoadingScreen';
 import { Filters } from './filters/FilterPanel';
@@ -13,14 +14,13 @@ type SearchResultsProps = {
   filters: Filters;
 };
 
-
 export function SearchResults({
   results,
   isSearching,
   searchQuery,
   filters,
 }: SearchResultsProps) {
-  const renderItem = ({ item }: { item: CourseItemProps }) => {
+  const renderItem = useCallback(({ item }: { item: CourseItemProps }) => {
     return (
       <CourseItem
         id={item.id}
@@ -33,9 +33,9 @@ export function SearchResults({
         onPress={() => console.log(`Curso seleccionado: ${item.id}`)}
       />
     );
-  };
+  }, []);
 
-  const keyExtractor = (item: CourseItemProps) => item.id;
+  const keyExtractor = useCallback((item: CourseItemProps) => item.id, []);
 
   return (
     <ThemedView style={styles.container}>
@@ -47,7 +47,7 @@ export function SearchResults({
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
-          ListEmptyComponent={() => <EmptyList searchQuery={searchQuery} filters={filters} />}
+          ListEmptyComponent={<EmptyList searchQuery={searchQuery} filters={filters} />}
           ListHeaderComponent={<ListHeader resultsCount={results.length} />}
           initialNumToRender={20}
         />

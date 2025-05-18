@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
 type SearchSuggestionsProps = {
@@ -18,11 +18,35 @@ export function SearchSuggestions({
 }: SearchSuggestionsProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const animatedHeight = useRef(new Animated.Value(0)).current;
+  const [debouncedState, setDebouncedState] = useState({
+    suggestions: [] as string[],
+    isVisible: false
+  });
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    if (isVisible && suggestions.length > 0) {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      setDebouncedState({
+        suggestions,
+        isVisible
+      });
+    }, 200);
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [suggestions, isVisible]);
+
+  useEffect(() => {
+    if (debouncedState.isVisible && debouncedState.suggestions.length > 0) {
       Animated.timing(animatedHeight, {
-        toValue: Math.min(suggestions.length * 44, 220),
+        toValue: Math.min(debouncedState.suggestions.length * 44, 220),
         duration: 200,
         useNativeDriver: false,
       }).start();
@@ -33,9 +57,9 @@ export function SearchSuggestions({
       duration: 200,
       useNativeDriver: false,
     }).start();
-  }, [isVisible, suggestions.length, animatedHeight]);
+  }, [debouncedState.isVisible, debouncedState.suggestions.length, animatedHeight]);
 
-  if (!isVisible) return null;
+  if (!debouncedState.isVisible) return null;
 
   return (
     <Animated.View
@@ -45,7 +69,7 @@ export function SearchSuggestions({
       ]}
     >
       <FlatList
-        data={suggestions.slice(0, 5)}
+        data={debouncedState.suggestions.slice(0, 5)}
         keyExtractor={(item) => item}
         renderItem={({ item }) => (
           <TouchableOpacity

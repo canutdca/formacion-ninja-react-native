@@ -1,9 +1,10 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { memo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Filters } from '../filters/FilterPanel';
 
-export function EmptyList ({ searchQuery, filters }: { searchQuery: string, filters: Filters }) {
+export const EmptyList = memo(function EmptyList({ searchQuery, filters }: { searchQuery: string, filters: Filters }) {
   const hasActiveSearch = searchQuery.length > 0;
   const hasActiveFilters =
     filters.categories.length > 0 ||
@@ -29,7 +30,7 @@ export function EmptyList ({ searchQuery, filters }: { searchQuery: string, filt
       </ThemedText>
     </ThemedView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   emptyContainer: {

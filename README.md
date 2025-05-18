@@ -135,3 +135,4 @@ npm start
             - FuzzyMatcher.ts -> Clase que contiene la lógica de búsqueda fuzzy
 4. Organizar mejor los resultados de la búsqueda creando los componentes ListHeader y EmptyList
 5. Arreglar la generación del Thumbnail de los cursos
+6. Añadir Memo y debounce en los componentes de EmptyList y SearchSuggestions para quitar el efecto de flicking
