@@ -1,18 +1,18 @@
 import { CourseItemProps } from "@/components/CourseItem";
 import { FilterOption, Filters } from "@/components/search/filters/FilterPanel";
-import { FilterManager } from "./FilterManager";
-import { TextSearchIndex } from "./TextSearchIndex";
+import { SearcherFilter } from "./search-filter/SearcherFilter";
+import { SearcherText } from "./search-text/SearcherText";
 
 
-export class SearchIndex {
-  private textSearchIndex: TextSearchIndex;
-  private filterManager: FilterManager;
+export class Searcher {
+  private textSearchIndex: SearcherText;
+  private filterManager: SearcherFilter;
   private documents: CourseItemProps[];
 
   constructor(documents: CourseItemProps[]) {
     this.documents = documents;
-    this.textSearchIndex = new TextSearchIndex(documents);
-    this.filterManager = new FilterManager(documents);
+    this.textSearchIndex = new SearcherText(documents);
+    this.filterManager = new SearcherFilter(documents);
   }
 
   search(query: string, filters: Filters): CourseItemProps[] {

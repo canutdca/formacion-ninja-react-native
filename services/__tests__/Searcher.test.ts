@@ -1,8 +1,8 @@
 import { CourseItemProps } from '@/components/CourseItem';
 import { Filters } from '@/components/search/filters/FilterPanel';
-import { SearchIndex } from '../SearchIndex';
+import { Searcher } from '../Searcher';
 
-describe('SearchIndex', () => {
+describe('Searcher', () => {
   const mockCourses: CourseItemProps[] = [
     {
       id: '1',
@@ -51,26 +51,26 @@ describe('SearchIndex', () => {
     }
   ];
 
-  let searchIndex: SearchIndex;
+  let searcher: Searcher;
 
   beforeEach(() => {
-    searchIndex = new SearchIndex(mockCourses);
+    searcher = new Searcher(mockCourses);
   });
 
   describe('basic search', () => {
     it('should return all courses when there is no query or filters', () => {
-      const results = searchIndex.search('', { categories: [], durations: [], levels: [] });
+      const results = searcher.search('', { categories: [], durations: [], levels: [] });
       expect(results).toHaveLength(5);
     });
 
     it('should find courses by exact title', () => {
-      const results = searchIndex.search('Administración', { categories: [], durations: [], levels: [] });
+      const results = searcher.search('Administración', { categories: [], durations: [], levels: [] });
       expect(results).toHaveLength(3);
       expect(results[0].title).toBe('Administración Local y Autonómica');
     });
 
     it('should find courses by category', () => {
-      const results = searchIndex.search('Justicia', { categories: [], durations: [], levels: [] });
+      const results = searcher.search('Justicia', { categories: [], durations: [], levels: [] });
       expect(results).toHaveLength(1);
       expect(results[0].category).toBe('Justicia');
     });
@@ -78,7 +78,7 @@ describe('SearchIndex', () => {
     it('should find courses by instructor', () => {
       // Fuzzy search allows small variations, so it can return more than one result
       // if there are similar names (for example, "María" and "Martínez").
-      const results = searchIndex.search('María', { categories: [], durations: [], levels: [] });
+      const results = searcher.search('María', { categories: [], durations: [], levels: [] });
       expect(results.length).toBeGreaterThanOrEqual(1);
       expect(results.map(r => r.instructor)).toContain('María García');
     });
@@ -91,7 +91,7 @@ describe('SearchIndex', () => {
         durations: [],
         levels: [],
       };
-      const results = searchIndex.search('', filters);
+      const results = searcher.search('', filters);
       expect(results).toHaveLength(3);
       expect(results[0].category).toBe('Administración General del Estado');
     });
@@ -102,7 +102,7 @@ describe('SearchIndex', () => {
         durations: ['short'],
         levels: [],
       };
-      const results = searchIndex.search('', filters);
+      const results = searcher.search('', filters);
       expect(results).toHaveLength(1);
       expect(results[0].duration).toBe('02:30');
     });
@@ -113,7 +113,7 @@ describe('SearchIndex', () => {
         durations: [],
         levels: ['beginner'],
       };
-      const results = searchIndex.search('', filters);
+      const results = searcher.search('', filters);
       expect(results).toHaveLength(1);
       expect(results[0].title).toContain('Introducción');
     });
@@ -121,33 +121,33 @@ describe('SearchIndex', () => {
 
   describe('suggestions', () => {
     it('should return suggestions based on title', () => {
-      const suggestions = searchIndex.getSuggestions('admin');
+      const suggestions = searcher.getSuggestions('admin');
       expect(suggestions).toContain('Introducción a la Administración Pública');
       expect(suggestions).toContain('Administración y Gestión Pública');
       expect(suggestions).toContain('Administración Local y Autonómica');
     });
 
     it('should limit the number of suggestions', () => {
-      const suggestions = searchIndex.getSuggestions('admin', 2);
+      const suggestions = searcher.getSuggestions('admin', 2);
       expect(suggestions).toHaveLength(2);
     });
   });
 
   describe('filter options', () => {
     it('should return all categories', () => {
-      const categories = searchIndex.getCategories();
+      const categories = searcher.getCategories();
       expect(categories).toHaveLength(3);
       expect(categories.map(c => c.label)).toContain('Administración General del Estado');
     });
 
     it('should return all durations', () => {
-      const durations = searchIndex.getDurations();
+      const durations = searcher.getDurations();
       expect(durations).toHaveLength(3);
       expect(durations.map(d => d.id)).toContain('short');
     });
 
     it('should return all levels', () => {
-      const levels = searchIndex.getLevels();
+      const levels = searcher.getLevels();
       expect(levels).toHaveLength(3);
       expect(levels.map(l => l.id)).toContain('beginner');
     });

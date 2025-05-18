@@ -1,6 +1,6 @@
 import type { CourseItemProps } from '@/components/CourseItem';
 import type { Filters } from '@/components/search/filters/FilterPanel';
-import { SearchIndex } from '@/services/SearchIndex';
+import { Searcher } from '@/services/Searcher';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useSearchEngine(courses: CourseItemProps[]) {
@@ -14,7 +14,7 @@ export function useSearchEngine(courses: CourseItemProps[]) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 
-  const searchIndex = useMemo(() => new SearchIndex(courses), [courses]);
+  const searchIndex = useMemo(() => new Searcher(courses), [courses]);
 
   const performSearch = useCallback(() => {
     setIsSearching(true);

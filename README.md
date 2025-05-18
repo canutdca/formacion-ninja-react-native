@@ -123,4 +123,13 @@ npm start
       - Mejorar el rendimiento de levenshteinDistance() (computacionalmente costoso (O(mn) donde m y n son las longitudes de las strings) limitando el número de comparaciones, usando un algoritmo mas eficienete e implementando una caché para las distancias ya calculadas, búsqueda de coincidencias exactas antes de fuzzy e ordenamiento por similitud
       - Para la búsqueda fuzzy, aplicar filtros primero y luego buscar en los documentos filtrados
       - Hacer la conversión a minutos se hace al indexar los cursos.
-
+   - Separación de responsabilidades para la búsqueda:
+      - Searcher.ts -> Clase que contiene la lógica de búsqueda
+         - SearcherFilter.ts -> Clase que contiene la lógica de filtrado
+            - FilterStrategy.ts -> Interfaz que define la lógica de filtrado
+               - CategoryFilterStrategy.ts -> Filtro por categoría
+               - DurationFilterStrategy.ts -> Filtro por duración
+               - LevelFilterStrategy.ts -> Filtro por nivel
+         - SearcherText.ts -> Clase que contiene la lógica de búsqueda por texto
+            - TextTokenizer.ts -> Clase que contiene la lógica de tokenización
+            - FuzzyMatcher.ts -> Clase que contiene la lógica de búsqueda fuzzy
