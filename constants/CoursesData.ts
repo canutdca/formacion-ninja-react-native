@@ -82,7 +82,7 @@ const COURSE_TITLES = [
 
 // Generar las miniaturas con Picsum para tener imágenes aleatorias
 function generateThumbnail(id: string): string {
-  return `https://picsum.photos/id/${parseInt(id) % 100 + 100}/320/180`;
+  return `https://picsum.photos/id/${id.split('_')[1]}/320/180`;
 }
 
 // Generar 100 cursos aleatorios
@@ -97,4 +97,4 @@ export const COURSES_DATA: CourseItemProps[] = Array.from({ length: 100 }, (_, i
     thumbnail: generateThumbnail(id),
     viewCount: VIEWS[index % VIEWS.length],
   };
-}); 
+});

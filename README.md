@@ -134,3 +134,4 @@ npm start
             - TextTokenizer.ts -> Clase que contiene la lógica de tokenización
             - FuzzyMatcher.ts -> Clase que contiene la lógica de búsqueda fuzzy
 4. Organizar mejor los resultados de la búsqueda creando los componentes ListHeader y EmptyList
+5. Arreglar la generación del Thumbnail de los cursos
