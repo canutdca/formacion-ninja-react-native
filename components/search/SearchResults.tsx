@@ -1,8 +1,10 @@
 import { CourseItem, CourseItemProps } from '@/components/CourseItem';
-import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { ActivityIndicator, FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
+import { LoadingScreen } from '../ui/LoadingScreen';
 import { Filters } from './filters/FilterPanel';
+import { EmptyList } from './results/EmptyList';
+import { ListHeader } from './results/ListHeader';
 
 type SearchResultsProps = {
   results: CourseItemProps[];
@@ -11,33 +13,6 @@ type SearchResultsProps = {
   filters: Filters;
 };
 
-const EmptyList = ({ searchQuery, filters }: { searchQuery: string, filters: Filters }) => {
-  const hasActiveSearch = searchQuery.length > 0;
-  const hasActiveFilters =
-    filters.categories.length > 0 ||
-    filters.durations.length > 0 ||
-    filters.levels.length > 0;
-
-  if (hasActiveSearch || hasActiveFilters) {
-    return (
-      <ThemedView style={styles.emptyContainer}>
-        <ThemedText style={styles.emptyTitle}>No se encontraron cursos</ThemedText>
-        <ThemedText style={styles.emptySubtitle}>
-          Prueba con otros términos de búsqueda o filtros diferentes
-        </ThemedText>
-      </ThemedView>
-    );
-  }
-
-  return (
-    <ThemedView style={styles.emptyContainer}>
-      <ThemedText style={styles.emptyTitle}>Explora los cursos disponibles</ThemedText>
-      <ThemedText style={styles.emptySubtitle}>
-        Usa el buscador o los filtros para encontrar cursos
-      </ThemedText>
-    </ThemedView>
-  );
-};
 
 export function SearchResults({
   results,
@@ -62,25 +37,10 @@ export function SearchResults({
 
   const keyExtractor = (item: CourseItemProps) => item.id;
 
-  const ListHeader = () => {
-    return results.length > 0 ? (
-      <ThemedText style={styles.resultsCount}>
-        {results.length} {results.length === 1 ? 'curso encontrado' : 'cursos encontrados'}
-      </ThemedText>
-    ) : null;
-  };
-
-  const LoadingView = () => (
-    <ThemedView style={styles.loadingContainer}>
-      <ActivityIndicator size="large" />
-      <ThemedText style={styles.loadingText}>Buscando cursos...</ThemedText>
-    </ThemedView>
-  );
-
   return (
     <ThemedView style={styles.container}>
       {isSearching ? (
-        <LoadingView />
+        <LoadingScreen message="Buscando cursos..." />
       ) : (
         <FlatList
           data={results}
@@ -88,7 +48,7 @@ export function SearchResults({
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={() => <EmptyList searchQuery={searchQuery} filters={filters} />}
-          ListHeaderComponent={ListHeader}
+          ListHeaderComponent={<ListHeader resultsCount={results.length} />}
           initialNumToRender={20}
         />
       )}
@@ -105,33 +65,5 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 20,
     minHeight: '100%',
-  },
-  resultsCount: {
-    marginBottom: 16,
-    opacity: 0.7,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  loadingText: {
-    marginTop: 16,
-  },
-  emptyContainer: {
-    padding: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    textAlign: 'center',
-    opacity: 0.7,
   },
 });

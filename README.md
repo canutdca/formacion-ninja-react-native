@@ -133,3 +133,4 @@ npm start
          - SearcherText.ts -> Clase que contiene la lógica de búsqueda por texto
             - TextTokenizer.ts -> Clase que contiene la lógica de tokenización
             - FuzzyMatcher.ts -> Clase que contiene la lógica de búsqueda fuzzy
+4. Organizar mejor los resultados de la búsqueda creando los componentes ListHeader y EmptyList
