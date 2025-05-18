@@ -8,9 +8,17 @@ export class SearchIndex {
   private categoryMap: Record<string, FilterOption> = {};
   private durationMap: Record<string, FilterOption> = {};
   private levelMap: Record<string, FilterOption> = {};
+  private tokenCache: Map<string, string[]> = new Map();
+  private distanceCache: Map<string, number> = new Map();
+  private readonly MAX_FUZZY_DISTANCE = 1;
+  private readonly MAX_FUZZY_RESULTS = 20;
+  private readonly MIN_TOKEN_LENGTH = 3;
 
   constructor(documents: CourseItemProps[]) {
-    this.documents = documents;
+    this.documents = documents.map(doc => ({
+      ...doc,
+      durationMinutes: this.durationToMinutes(doc.duration)
+    }));
     this.buildIndex();
     this.buildCategoryMap();
     this.buildDurationMap();
@@ -21,14 +29,31 @@ export class SearchIndex {
     this.documents.forEach(doc => {
       this.documentMap[doc.id] = doc;
 
-      const tokens = this.tokenize(doc.title + ' ' + doc.category + ' ' + doc.instructor);
+      const titleTokens = this.getCachedTokens(doc.title);
+      const categoryTokens = this.getCachedTokens(doc.category);
+      const instructorTokens = this.getCachedTokens(doc.instructor);
 
-      tokens.forEach(token => {
-        if (!this.invertedIndex[token]) {
-          this.invertedIndex[token] = new Set<string>();
-        }
-        this.invertedIndex[token].add(doc.id);
-      });
+      this.indexTokens(titleTokens, doc.id);
+      this.indexTokens(categoryTokens, doc.id);
+      this.indexTokens(instructorTokens, doc.id);
+    });
+  }
+
+  private getCachedTokens(text: string): string[] {
+    const cached = this.tokenCache.get(text);
+    if (cached) return cached;
+
+    const tokens = this.tokenize(text);
+    this.tokenCache.set(text, tokens);
+    return tokens;
+  }
+
+  private indexTokens(tokens: string[], docId: string): void {
+    tokens.forEach(token => {
+      if (!this.invertedIndex[token]) {
+        this.invertedIndex[token] = new Set<string>();
+      }
+      this.invertedIndex[token].add(docId);
     });
   }
 
@@ -145,8 +170,21 @@ export class SearchIndex {
   }
 
   private levenshteinDistance(a: string, b: string): number {
-    const matrix: number[][] = [];
+    // Optimization: if strings are identical, distance is 0
+    if (a === b) return 0;
 
+    // Optimization: if one string is empty, distance is the length of the other one
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+
+    // Optimization: if the length difference is greater than maxDistance,
+    // the distance will be greater than maxDistance
+    const maxDistance = this.MAX_FUZZY_DISTANCE;
+    if (Math.abs(a.length - b.length) > maxDistance) {
+      return maxDistance + 1;
+    }
+
+    const matrix: number[][] = [];
     for (let i = 0; i <= a.length; i++) {
       matrix[i] = [i];
     }
@@ -176,27 +214,84 @@ export class SearchIndex {
 
     let resultIds: Set<string> = new Set();
 
-    if (query) {
-      const queryTokens = this.tokenize(query);
-
-      const exactMatches = this.exactSearch(queryTokens);
-      exactMatches.forEach(id => resultIds.add(id));
-
-      if (resultIds.size < 10) {
-        const fuzzyMatches = this.fuzzySearch(queryTokens);
-        fuzzyMatches.forEach(id => resultIds.add(id));
-      }
+    // If there are active filters, apply them first
+    if (this.hasActiveFilters(filters)) {
+      // Apply filters to all documents
+      this.documents.forEach(doc => {
+        if (this.matchesFilters(doc, filters)) {
+          resultIds.add(doc.id);
+        }
+      });
     } else {
+      // If there are no filters, include all documents
       this.documents.forEach(doc => resultIds.add(doc.id));
     }
 
-    if (this.hasActiveFilters(filters)) {
-      resultIds = this.applyFilters(resultIds, filters);
+    // If there is a query, search only in filtered documents
+    if (query) {
+      const queryTokens = this.tokenize(query);
+      const filteredResults = new Set<string>();
+
+      // Exact search in filtered documents
+      const exactMatches = this.exactSearch(queryTokens);
+      exactMatches.forEach(id => {
+        if (resultIds.has(id)) {
+          filteredResults.add(id);
+        }
+      });
+
+      // If there aren't enough exact matches, perform fuzzy search
+      if (filteredResults.size < 10) {
+        const fuzzyMatches = this.fuzzySearch(queryTokens);
+        fuzzyMatches.forEach(id => {
+          if (resultIds.has(id)) {
+            filteredResults.add(id);
+          }
+        });
+      }
+
+      resultIds = filteredResults;
     }
 
     const results = Array.from(resultIds).map(id => this.documentMap[id]);
-
     return results.sort((a, b) => a.title.localeCompare(b.title));
+  }
+
+  private matchesFilters(doc: CourseItemProps & { durationMinutes?: number }, filters: Filters): boolean {
+    if (filters.categories.length > 0) {
+      const categoryId = this.normalizeForId(doc.category);
+      if (!filters.categories.includes(categoryId)) {
+        return false;
+      }
+    }
+
+    if (filters.durations.length > 0) {
+      // Use the precalculated value if it exists
+      const minutes = doc.durationMinutes !== undefined ? doc.durationMinutes : this.durationToMinutes(doc.duration);
+      const durationMatch = filters.durations.some(durationId => {
+        if (durationId === 'short') return minutes < 180;
+        if (durationId === 'medium') return minutes >= 180 && minutes < 360;
+        if (durationId === 'long') return minutes >= 360;
+        return false;
+      });
+
+      if (!durationMatch) return false;
+    }
+
+    if (filters.levels.length > 0) {
+      let level = 'intermediate';
+      if (doc.title.toLowerCase().includes('básico') || doc.title.toLowerCase().includes('introducción')) {
+        level = 'beginner';
+      } else if (doc.title.toLowerCase().includes('avanzado') || doc.title.toLowerCase().includes('superior')) {
+        level = 'advanced';
+      }
+
+      if (!filters.levels.includes(level)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private hasActiveFilters(filters: Filters): boolean {
@@ -234,62 +329,72 @@ export class SearchIndex {
     const fuzzyMatches = new Set<string>();
     const allTokens = Object.keys(this.invertedIndex);
 
-    queryTokens.forEach(queryToken => {
-      const maxDistance = Math.min(2, Math.floor(queryToken.length / 3));
+    // Filter tokens by length to reduce comparisons
+    const relevantTokens = allTokens.filter(token =>
+      token.length >= this.MIN_TOKEN_LENGTH
+    );
 
-      allTokens.forEach(indexToken => {
-        const distance = this.levenshteinDistance(queryToken, indexToken);
+    for (const queryToken of queryTokens) {
+      if (queryToken.length < this.MIN_TOKEN_LENGTH) continue;
+      if (fuzzyMatches.size >= this.MAX_FUZZY_RESULTS) break;
 
-        if (distance <= maxDistance) {
-          this.invertedIndex[indexToken].forEach(id => fuzzyMatches.add(id));
-        }
-      });
-    });
+      const maxDistance = Math.min(
+        this.MAX_FUZZY_DISTANCE,
+        Math.floor(queryToken.length / 3)
+      );
+
+      // Sort tokens by similarity to process the most likely ones first
+      const candidates = this.findFuzzyCandidates(queryToken, relevantTokens, maxDistance);
+
+      for (const candidate of candidates) {
+        if (fuzzyMatches.size >= this.MAX_FUZZY_RESULTS) break;
+        this.invertedIndex[candidate].forEach(id => fuzzyMatches.add(id));
+      }
+    }
 
     return Array.from(fuzzyMatches);
   }
 
-  private applyFilters(resultIds: Set<string>, filters: Filters): Set<string> {
-    return new Set(
-      Array.from(resultIds).filter(id => {
-        const doc = this.documentMap[id];
-
-        if (filters.categories.length > 0) {
-          const categoryId = this.normalizeForId(doc.category);
-          if (!filters.categories.includes(categoryId)) {
-            return false;
-          }
-        }
-
-        if (filters.durations.length > 0) {
-          const minutes = this.durationToMinutes(doc.duration);
-          const durationMatch = filters.durations.some(durationId => {
-            if (durationId === 'short') return minutes < 180;
-            if (durationId === 'medium') return minutes >= 180 && minutes < 360;
-            if (durationId === 'long') return minutes >= 360;
-            return false;
-          });
-
-          if (!durationMatch) return false;
-        }
-
-        if (filters.levels.length > 0) {
-          let level = 'intermediate';
-
-          if (doc.title.toLowerCase().includes('básico') || doc.title.toLowerCase().includes('introducción')) {
-            level = 'beginner';
-          } else if (doc.title.toLowerCase().includes('avanzado') || doc.title.toLowerCase().includes('superior')) {
-            level = 'advanced';
-          }
-
-          if (!filters.levels.includes(level)) {
-            return false;
-          }
-        }
-
-        return true;
-      })
+  private findFuzzyCandidates(
+    queryToken: string,
+    tokens: string[],
+    maxDistance: number
+  ): string[] {
+    // First try exact matches or prefixes
+    const exactMatches = tokens.filter(token =>
+      token === queryToken || token.startsWith(queryToken)
     );
+    if (exactMatches.length > 0) return exactMatches;
+
+    // If there are no exact matches, look for fuzzy matches
+    return tokens
+      .filter(token => {
+        // Calculate distance only if lengths are similar
+        if (Math.abs(token.length - queryToken.length) > maxDistance) {
+          return false;
+        }
+        const distance = this.getCachedDistance(queryToken, token);
+        return distance <= maxDistance;
+      })
+      .sort((a, b) => {
+        // Sort by distance
+        const distA = this.getCachedDistance(queryToken, a);
+        const distB = this.getCachedDistance(queryToken, b);
+        return distA - distB;
+      });
+  }
+
+  private getCachedDistance(a: string, b: string): number {
+    // Sort strings to have a consistent key
+    const [str1, str2] = [a, b].sort();
+    const cacheKey = `${str1}:${str2}`;
+
+    const cached = this.distanceCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const distance = this.levenshteinDistance(str1, str2);
+    this.distanceCache.set(cacheKey, distance);
+    return distance;
   }
 
   getSuggestions(query: string, limit = 5): string[] {

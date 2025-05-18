@@ -117,3 +117,10 @@ npm start
 3. Búsqueda:
    - Separación de responabilidades: separar el hook y la lógica de búsqueda
    - Creación de tests para verificar que se cumplen los requisitos pedidos
+   - Optimización:
+      - Cambiar el token actual de `doc.title + ' ' + doc.category + ' ' + doc.instructor` por un token para cada campo
+      - Llamar solo tokenize() gracias a una caché para los tokens
+      - Mejorar el rendimiento de levenshteinDistance() (computacionalmente costoso (O(mn) donde m y n son las longitudes de las strings) limitando el número de comparaciones, usando un algoritmo mas eficienete e implementando una caché para las distancias ya calculadas, búsqueda de coincidencias exactas antes de fuzzy e ordenamiento por similitud
+      - Para la búsqueda fuzzy, aplicar filtros primero y luego buscar en los documentos filtrados
+      - Hacer la conversión a minutos se hace al indexar los cursos.
+
