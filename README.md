@@ -146,3 +146,4 @@ npm start
 - Usar mejor los colores: actualmente en algunos sitios usa los colores en los estilos hardcodeados y en otros usa el hook useThemeColor
 - Cancelar búsquedas anteriores al hacer una nueva
 - Coordinar los estilos del "explorer" y de la "home" (backgroundColor)
+- Tanto la "home" como "explorer" usan los mismos cursos. Quizá se podría hacer que compartiesen la misma memoria del listado total de cursos usando un Contexto de React
