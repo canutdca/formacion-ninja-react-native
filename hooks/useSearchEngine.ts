@@ -5,35 +5,30 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useSearchEngine(courses: CourseItemProps[]) {
   const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({
     categories: [],
     durations: [],
     levels: [],
   });
   const [searchResults, setSearchResults] = useState<CourseItemProps[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
 
-  const searchIndex = useMemo(() => new Searcher(courses), [courses]);
+  const searcher = useMemo(() => new Searcher(courses), [courses]);
 
   const performSearch = useCallback(() => {
-    setIsSearching(true);
-
-    setTimeout(() => {
-      const results = searchIndex.search(query, filters);
-      setSearchResults(results);
-      setIsSearching(false);
-    }, 500);
-  }, [searchIndex, query, filters]);
+    setLoading(true);
+    setSearchResults(searcher.search(query, filters));
+    setLoading(false);
+  }, [searcher, query, filters]);
 
   useEffect(() => {
     if (query.length >= 2) {
-      const suggestions = searchIndex.getSuggestions(query);
-      setSearchSuggestions(suggestions);
-    } else {
-      setSearchSuggestions([]);
+      setSearchSuggestions(searcher.getSuggestions(query));
+      return
     }
-  }, [query, searchIndex]);
+    setSearchSuggestions([]);
+  }, [query, searcher]);
 
   useEffect(() => {
     performSearch();
@@ -48,16 +43,16 @@ export function useSearchEngine(courses: CourseItemProps[]) {
   }, []);
 
   const getCategories = useCallback(() => {
-    return searchIndex.getCategories();
-  }, [searchIndex]);
+    return searcher.getCategories();
+  }, [searcher]);
 
   const getDurations = useCallback(() => {
-    return searchIndex.getDurations();
-  }, [searchIndex]);
+    return searcher.getDurations();
+  }, [searcher]);
 
   const getLevels = useCallback(() => {
-    return searchIndex.getLevels();
-  }, [searchIndex]);
+    return searcher.getLevels();
+  }, [searcher]);
 
   return {
     query,
@@ -65,7 +60,7 @@ export function useSearchEngine(courses: CourseItemProps[]) {
     filters,
     setFilters,
     searchResults,
-    isSearching,
+    loading,
     performSearch,
     getCategories,
     getDurations,

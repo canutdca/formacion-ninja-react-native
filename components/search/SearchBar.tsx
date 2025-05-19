@@ -32,9 +32,9 @@ export function SearchBar({ query, onChangeQuery, onSearch, suggestions }: Searc
     onChangeQuery(text);
     if (text.length > 0 && suggestions.length > 0) {
       setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
+      return
     }
+    setShowSuggestions(false);
   };
 
   const handleSubmit = () => {

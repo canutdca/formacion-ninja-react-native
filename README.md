@@ -136,3 +136,10 @@ npm start
 4. Organizar mejor los resultados de la búsqueda creando los componentes ListHeader y EmptyList
 5. Arreglar la generación del Thumbnail de los cursos
 6. Añadir Memo y debounce en los componentes de EmptyList y SearchSuggestions para quitar el efecto de flicking
+7. Se han quitado todos los setTimeouts innecesarios que provocaban un delay en la carga de los cursos
+
+
+Tareas pendientes:
+- Arreglar el flicking de que genera el FlatList de cursos
+- Usar mejor los colores: actualmente en algunos sitios usa los colores en los estilos hardcodeados y en otros usa el hook useThemeColor
+- Cancelar búsquedas anteriores al hacer una nueva

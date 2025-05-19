@@ -4,17 +4,15 @@ import { SearchResults } from '@/components/search/SearchResults';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { Colors } from '@/constants/Colors';
 import { COURSES_DATA } from '@/constants/CoursesData';
 import { useColorScheme } from '@/hooks/useColorScheme.web';
 import { useSearchEngine } from '@/hooks/useSearchEngine';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ExploreScreen() {
-  const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const colorScheme = useColorScheme() ?? 'light';
 
@@ -24,7 +22,7 @@ export default function ExploreScreen() {
     filters,
     setFilters,
     searchResults,
-    isSearching,
+    loading,
     performSearch,
     getCategories,
     getDurations,
@@ -40,18 +38,6 @@ export default function ExploreScreen() {
       filters.levels.length > 0
     );
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <LoadingScreen message="Inicializando motor de búsqueda..."/>;
-  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -101,7 +87,7 @@ export default function ExploreScreen() {
       <ThemedView style={styles.resultsContainer}>
         <SearchResults
           results={searchResults}
-          isSearching={isSearching}
+          loading={loading}
           searchQuery={query}
           filters={filters}
         />

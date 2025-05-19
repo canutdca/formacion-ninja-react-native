@@ -9,14 +9,14 @@ import { ListHeader } from './results/ListHeader';
 
 type SearchResultsProps = {
   results: CourseItemProps[];
-  isSearching: boolean;
+  loading: boolean;
   searchQuery: string;
   filters: Filters;
 };
 
 export function SearchResults({
   results,
-  isSearching,
+  loading,
   searchQuery,
   filters,
 }: SearchResultsProps) {
@@ -39,7 +39,7 @@ export function SearchResults({
 
   return (
     <ThemedView style={styles.container}>
-      {isSearching ? (
+      {loading ? (
         <LoadingScreen message="Buscando cursos..." />
       ) : (
         <FlatList

@@ -20,14 +20,14 @@ export class Searcher {
       return this.documents;
     }
 
-    let resultIds: Set<string>;
-    if (this.filterManager.hasActiveFilters(filters)) {
-      resultIds = this.filterManager.filterDocuments(filters);
-    } else {
-      resultIds = new Set(this.documents.map(doc => doc.id));
-    }
-
+    let resultIds = this.getResults(filters);
     return this.textSearchIndex.search(query, resultIds);
+  }
+
+  private getResults(filters: Filters): Set<string> {
+    if (this.filterManager.hasActiveFilters(filters))
+      return this.filterManager.filterDocuments(filters);
+    return new Set(this.documents.map(doc => doc.id));
   }
 
   getSuggestions(query: string, limit = 5): string[] {

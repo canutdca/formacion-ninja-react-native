@@ -15,7 +15,6 @@ export default function CoursesScreen() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
       setCourses(COURSES_DATA);
       setLoading(false);
     };
