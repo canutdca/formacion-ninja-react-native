@@ -147,3 +147,6 @@ npm start
 - Cancelar búsquedas anteriores al hacer una nueva
 - Coordinar los estilos del "explorer" y de la "home" (backgroundColor)
 - Tanto la "home" como "explorer" usan los mismos cursos. Quizá se podría hacer que compartiesen la misma memoria del listado total de cursos usando un Contexto de React
+
+### Consideraciones:
+No lo he podido probar en ios y android porque no tengo los SDKs instalados y no me ha dado tiempo a ponerme. He preferido centrarme en el código en sí.
