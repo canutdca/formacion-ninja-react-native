@@ -1,3 +1,5 @@
+import { StemmerWord } from "./StemmerWord";
+
 export class TextTokenizer {
   private tokenCache: Map<string, string[]> = new Map();
   private readonly MIN_TOKEN_LENGTH = 2;
@@ -21,20 +23,9 @@ export class TextTokenizer {
   }
 
   private stemWord(word: string): string {
-    if (word.endsWith('es') && word.length > 4) {
-      word = word.slice(0, -2);
-    } else if (word.endsWith('s') && word.length > 3) {
-      word = word.slice(0, -1);
-    }
-
-    const suffixes = ['ción', 'ciones', 'mente', 'dad', 'dades', 'ando', 'endo', 'ado', 'ido', 'aba', 'ía'];
-    for (const suffix of suffixes) {
-      if (word.endsWith(suffix) && word.length > suffix.length + 2) {
-        word = word.slice(0, -suffix.length);
-        break;
-      }
-    }
-
-    return word;
+    const stemWordManager = new StemmerWord(word);
+    stemWordManager.stemPlural()
+    stemWordManager.stemSuffixes();
+    return stemWordManager.getWord();
   }
 }
