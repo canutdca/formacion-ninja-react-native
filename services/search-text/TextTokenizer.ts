@@ -14,12 +14,18 @@ export class TextTokenizer {
   }
 
   private tokenize(text: string): string[] {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\sáéíóúüñ]/g, '')
+    return this.normalizeText(text)
       .split(/\s+/)
       .filter(token => token.length >= this.MIN_TOKEN_LENGTH)
       .map(token => this.stemWord(token));
+  }
+
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/[^\w\s]/g, ''); // Remove special characters
   }
 
   private stemWord(word: string): string {

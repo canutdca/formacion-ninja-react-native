@@ -69,17 +69,33 @@ describe('Searcher', () => {
       expect(results[0].title).toBe('Administración Local y Autonómica');
     });
 
+    it('should find courses by title accent insensitive', () => {
+      const results = searcher.search('preparacion', { categories: [], durations: [], levels: [] });
+      expect(results).toHaveLength(1);
+      expect(results[0].title).toBe('Preparación Oposiciones Educación Básica');
+    });
+
     it('should find courses by category', () => {
       const results = searcher.search('Justicia', { categories: [], durations: [], levels: [] });
       expect(results).toHaveLength(1);
       expect(results[0].category).toBe('Justicia');
     });
 
+    it('should find courses by category case insensitive', () => {
+      const results = searcher.search('administracion', { categories: [], durations: [], levels: [] });
+      expect(results).toHaveLength(3);
+      expect(results[0].category).toBe('Administración General del Estado');
+    });
+
     it('should find courses by instructor', () => {
-      // Fuzzy search allows small variations, so it can return more than one result
-      // if there are similar names (for example, "María" and "Martínez").
       const results = searcher.search('María', { categories: [], durations: [], levels: [] });
-      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(results.length).toBe(1);
+      expect(results.map(r => r.instructor)).toContain('María García');
+    });
+
+    it('should find courses by instructor accent insensitive', () => {
+      const results = searcher.search('maria', { categories: [], durations: [], levels: [] });
+      expect(results.length).toBe(1);
       expect(results.map(r => r.instructor)).toContain('María García');
     });
   });
