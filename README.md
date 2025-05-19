@@ -1,18 +1,19 @@
 # Prueba Técnica: Motor de Búsqueda y Filtrado Avanzado
 
-## Objetivo
+## Enunciado
+### Objetivo
 
 En esta prueba técnica, se te presenta una aplicación de React Native con Expo que muestra un listado de cursos de oposiciones en España. La aplicación funciona, pero necesita la implementación de un motor de búsqueda avanzado en la pestaña "Explorar". El objetivo es evaluar tus habilidades en arquitectura de software, algoritmos de búsqueda, manejo de estructuras de datos complejas y optimización de JavaScript.
 
-## Tiempo estimado
+### Tiempo estimado
 
 Esta prueba está diseñada para completarse en un máximo de 5-8 horas.
 
-## Contexto
+### Contexto
 
 La aplicación es una plataforma educativa que ofrece cursos para preparar oposiciones. La pantalla principal muestra un listado de aproximadamente 100 cursos disponibles, y necesitamos un sistema de búsqueda y filtrado potente para que los usuarios puedan encontrar rápidamente lo que necesitan.
 
-## Requisitos Principales
+### Requisitos Principales
 
 Debes implementar un motor de búsqueda que cumpla con las siguientes características:
 
@@ -42,7 +43,7 @@ Debes implementar un motor de búsqueda que cumpla con las siguientes caracterí
    - Implementación de animaciones y transiciones fluidas
    - Atención al detalle y usabilidad de la interfaz
 
-## Problemas conocidos que deben resolverse
+### Problemas conocidos que deben resolverse
 
 La aplicación presenta varios problemas que debes solucionar:
 
@@ -50,7 +51,7 @@ La aplicación presenta varios problemas que debes solucionar:
 2. La carga inicial de la aplicación es demasiado lenta.
 3. La memoria utilizada por la aplicación es excesiva, provocando cierres inesperados en algunos dispositivos.
 
-## Estructura del Código
+### Estructura del Código
 
 Se pide implementar la solución utilizando la pestaña "Explore" de la aplicación existente, integrando los siguientes elementos:
 
@@ -58,7 +59,7 @@ Se pide implementar la solución utilizando la pestaña "Explore" de la aplicaci
 - **Motor de búsqueda**: Crear la lógica necesaria para indexar y buscar cursos
 - **Gestión de estado**: Manejar el estado de búsqueda, filtros y resultados
 
-## Tareas
+### Tareas
 
 1. **Analiza el código existente e identifica los problemas específicos** que causan el bajo rendimiento.
 2. **Implementa soluciones** para los problemas identificados, manteniendo o mejorando la experiencia de usuario actual.
@@ -67,7 +68,7 @@ Se pide implementar la solución utilizando la pestaña "Explore" de la aplicaci
    - Qué soluciones implementaste y por qué.
    - Qué mejoras adicionales propondrías si tuvieras más tiempo.
 
-## Criterios de Evaluación
+### Criterios de Evaluación
 
 Tu solución será evaluada en base a:
 
@@ -77,7 +78,7 @@ Tu solución será evaluada en base a:
 4. **Calidad del Código**: Legibilidad, mantenibilidad, reutilización
 5. **Experiencia de Usuario**: Fluidez y rapidez en la interfaz
 
-## Consideraciones importantes
+### Consideraciones importantes
 
 - No es necesario añadir funcionalidades nuevas además de las especificadas, solo optimizar el rendimiento y desarrollar el motor de búsqueda.
 - Asegúrate de que tus soluciones funcionen tanto en iOS como en Android.
@@ -87,14 +88,14 @@ Tu solución será evaluada en base a:
 - Prioriza la calidad sobre la cantidad: es mejor implementar menos características pero de forma óptima.
 - Explica claramente los trade-offs considerados en tu solución.
 
-## Entrega
+### Entrega
 
 Al finalizar, debes entregar:
 
 1. El código fuente completo de la aplicación con tus soluciones.
 2. Un documento breve explicando los problemas que encontraste y las soluciones implementadas.
 
-## Para ejecutar la aplicación
+### Para ejecutar la aplicación
 
 ```bash
 # Instalar dependencias
@@ -106,8 +107,9 @@ npm start
 
 ¡Buena suerte!
 
+## Resolución
 
-# Tareas realizadas:
+### Tareas realizadas:
 1. Preparar vscode para poder trabajar correctamente con eslint.
 2. Organizar mejor la caja de búsqueda y los filtros:
    - Añadir los iconos que no se están viendo
@@ -138,8 +140,9 @@ npm start
 6. Añadir Memo y debounce en los componentes de EmptyList y SearchSuggestions para quitar el efecto de flicking
 7. Se han quitado todos los setTimeouts innecesarios que provocaban un delay en la carga de los cursos
 
-
-Tareas pendientes:
+### Tareas pendientes:
 - Arreglar el flicking de que genera el FlatList de cursos
+- Arreglar el flicking del tema oscuro al entrar en la app
 - Usar mejor los colores: actualmente en algunos sitios usa los colores en los estilos hardcodeados y en otros usa el hook useThemeColor
 - Cancelar búsquedas anteriores al hacer una nueva
+- Coordinar los estilos del "explorer" y de la "home" (backgroundColor)
